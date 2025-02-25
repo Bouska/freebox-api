@@ -203,7 +203,7 @@ class Wifi:
         """
         Start wifi access point neighbors scan
         """
-        await self._access.post("wifi/ap/{0}/neighbors/scan/")
+        await self._access.post(f"wifi/ap/{ap_id}/neighbors/scan/")
 
     async def start_wps_session(
         self, start_wps_session_data=start_wps_session_data_schema
