@@ -60,7 +60,7 @@ class Fs:
         if await self._path_exists(path):
             self._path = os.path.join(self._path, path)
         else:
-            logger.error("%s path does not exist", os.path.join(self._path, path))
+            logger.error(f"{os.path.join(self._path, path)} path does not exist")
 
     async def _path_exists(self, path):
         """
@@ -70,7 +70,7 @@ class Fs:
             await self.get_file_info(os.path.join(self._path, path))
             return True
         except freebox_api.exceptions.HttpRequestError:
-            logger.debug("%s path does not exist", os.path.join(self._path, path))
+            logger.debug(f"{os.path.join(self._path, path)} path does not exist")
             return False
 
     async def archive_files(self, archive):

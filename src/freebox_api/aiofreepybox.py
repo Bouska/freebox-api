@@ -245,7 +245,7 @@ class Freepybox:
 
             # Store application token in file
             self._writefile_app_token(app_token, track_id, app_desc, token_file)
-            logger.info("Application token file was generated: %s", token_file)
+            logger.info(f"Application token file was generated: {token_file}")
 
         # Create freebox http access module
         fbx_access = Access(
