@@ -1,8 +1,10 @@
 import asyncio
+import importlib
 import json
 import logging
 from os import path
 from os import PathLike
+import pkgutil
 import socket
 import ssl
 from typing import Any
@@ -16,33 +18,6 @@ from aiohttp import ClientSession, ClientTimeout
 from aiohttp import TCPConnector
 
 import freebox_api
-from freebox_api.access import Access
-from freebox_api.api.airmedia import Airmedia
-from freebox_api.api.call import Call
-from freebox_api.api.connection import Connection
-from freebox_api.api.dhcp import Dhcp
-from freebox_api.api.download import Download
-from freebox_api.api.freeplug import Freeplug
-from freebox_api.api.fs import Fs
-from freebox_api.api.ftp import Ftp
-from freebox_api.api.fw import Fw
-from freebox_api.api.home import Home
-from freebox_api.api.lan import Lan
-from freebox_api.api.lcd import Lcd
-from freebox_api.api.netshare import Netshare
-from freebox_api.api.notifications import Notifications
-from freebox_api.api.parental import Parental
-from freebox_api.api.phone import Phone
-from freebox_api.api.player import Player
-from freebox_api.api.remote import Remote
-from freebox_api.api.rrd import Rrd
-from freebox_api.api.storage import Storage
-from freebox_api.api.switch import Switch
-from freebox_api.api.system import System
-from freebox_api.api.tv import Tv
-from freebox_api.api.upnpav import Upnpav
-from freebox_api.api.upnpigd import Upnpigd
-from freebox_api.api.wifi import Wifi
 from freebox_api.exceptions import AuthorizationError
 from freebox_api.exceptions import InvalidTokenError
 from freebox_api.exceptions import NotOpenError
@@ -83,33 +58,18 @@ class Freepybox:
         self._session: ClientSession
         self._access: Access
 
-        # Define modules
-        self.tv: Tv
-        self.system: System
-        self.dhcp: Dhcp
-        self.airmedia: Airmedia
-        self.player: Player
-        self.switch: Switch
-        self.lan: Lan
-        self.storage: Storage
-        self.lcd: Lcd
-        self.wifi: Wifi
-        self.phone: Phone
-        self.ftp: Ftp
-        self.fs: Fs
-        self.fw: Fw
-        self.freeplug: Freeplug
-        self.call: Call
-        self.connection: Connection
-        self.download: Download
-        self.home: Home
-        self.parental: Parental
-        self.netshare: Netshare
-        self.notifications: Notifications
-        self.remote: Remote
-        self.rrd: Rrd
-        self.upnpav: Upnpav
-        self.upnpigd: Upnpigd
+        self._load_api_modules()
+
+    def _load_api_modules(self):
+        api_package = "freebox_api.api"
+        package_path = path.join(path.dirname(__file__), "api")
+
+        for _, module_name, _ in pkgutil.iter_modules([package_path]):
+            module = importlib.import_module(f"{api_package}.{module_name}")
+            class_name = module_name.capitalize()
+            if hasattr(module, class_name):
+                setattr(self, module_name, getattr(module, class_name)())
+
 
     async def open(self, host: str, port: str) -> None:
         """
